@@ -1,0 +1,7 @@
+# Python stuff
+venv
+__pycache__
+# Environmental variables
+.env
+# Save games
+*.sav
