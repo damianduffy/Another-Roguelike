@@ -97,32 +97,35 @@ class BaseEntity(arcade.Sprite):
 class Player(BaseEntity):
     def __init__(self, filename: str = None):
         super().__init__(
-            #filename="assets/gfx/player/walk down1.png", 
-            #filename="assets/gfx/tile_0004.png", 
             center_x = random.randrange(config.GRID_WIDTH) * config.TILE_SIZE, 
             center_y = random.randrange(config.GRID_HEIGHT) * config.TILE_SIZE, 
         )
-        #self.center_x = random.randrange(config.GRID_WIDTH) * config.TILE_SIZE
-        #self.center_y = random.randrange(config.GRID_HEIGHT) * config.TILE_SIZE
-        self.charactor_directions = ["SOUTH", "NORTH", "EAST", "WEST"]
+        self.charactor_directions = ["down", "up", "right", "left"]
         self.direction_index = 0
+        self.charactor_actions = ["idle", "walk", "attack"]
+        self.action_index = 1
         self.max_frames = 4
-        self.cur_texture = 0
+        self.cur_frame = 0
         self.updates_per_frame = 5
         # Load textures for walking
         self.walk_textures = []
-        for direction in self.charactor_directions:
-            animation_frames = []
-            for i in range(self.max_frames):
-                texture = arcade.load_texture(f"assets/gfx/player/walk_{direction}_{i}.png")
-                animation_frames.append(texture)
-            self.walk_textures.append(animation_frames)
-        self.texture = self.walk_textures[self.direction_index][self.cur_texture]
+        for action in self.charactor_actions:
+            action_frames = []
+            for direction in self.charactor_directions:
+                animation_frames = []
+                for i in range(self.max_frames):
+                    texture = arcade.load_texture(f"assets/gfx/player/{action}_{direction}_{i}.png")
+                    animation_frames.append(texture)
+                action_frames.append(animation_frames)
+            self.walk_textures.append(action_frames)
+        self.texture = self.walk_textures[self.action_index][self.direction_index][self.cur_frame]
+        
         # Track movement keys
         self.down_pressed = False
         self.up_pressed = False
         self.right_pressed = False
         self.left_pressed = False
+        self.attack_pressed = False
         # Speed limit
         self.max_speed = 3.0
         # How fast we accelerate
@@ -135,18 +138,46 @@ class Player(BaseEntity):
         self.defense = 2
 
     def update_animation(self, delta_time: float = 1 / 60):
+        # Attack animation
+        if self.attack_pressed:
+            if self.action_index != 2:
+                self.action_index = 2
+                self.cur_frame = 0
+            if self.cur_frame >= self.max_frames * self.updates_per_frame:
+                self.cur_frame = 0
+                self.action_index = 1
+                self.attack_pressed = False
+            frame = self.cur_frame // self.updates_per_frame
+            self.texture = self.walk_textures[self.action_index][self.direction_index][frame]
+            # Current issue adjusting hitbox to match attack animation.
+            # Fix is to adjust for current possition when getting 
+            print(f"Attack frame {self.cur_frame}")
+            print(f"Hitbox is {self.get_hit_box()}")
+            print(f"Current position is {self.position}")
+            print(f"adjusted is {self.get_adjusted_hit_box()}")
+            # self.set_hit_box(get_adjusted_hit_box() ... adjusted for position)
+            '''
+            # This should work or something like it...
+            new_hitbox = []
+            for coords in self.get_hit_box():
+                adjusted = [x1 - x2 for (x1, x2) in zip(coords, self.position)])
+                new_hitbox.append(adjusted)
+            '''
+            self.cur_frame += 1
+            return
+
         # Idle animation
         if self.change_x == 0 and self.change_y == 0:
-            self.cur_texture = 0
+            self.action_index = 0
             return
 
         # Walking animation
-        self.cur_texture += 1
-        if self.cur_texture > (self.max_frames - 1) * self.updates_per_frame:
-            self.cur_texture = 0
-        frame = self.cur_texture // self.updates_per_frame
-        self.texture = self.walk_textures[self.direction_index][frame]
-    
+        self.cur_frame += 1
+        if self.cur_frame >= self.max_frames * self.updates_per_frame:
+            self.cur_frame = 0
+        frame = self.cur_frame // self.updates_per_frame
+        self.texture = self.walk_textures[self.action_index][self.direction_index][frame]
+        
     def on_update(self, delta_time):
         """ Movement and game logic """
         # Add some friction
@@ -223,6 +254,8 @@ class Player(BaseEntity):
             self.left_pressed = True
         elif key == arcade.key.RIGHT:
             self.right_pressed = True
+        elif key == arcade.key.SPACE:
+            self.attack_pressed = True
         
     def on_key_release(self, key, modifiers):
         """Called when the user releases a key. """
