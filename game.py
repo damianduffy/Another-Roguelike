@@ -62,8 +62,10 @@ class Game(arcade.View):
         self.player_list = arcade.SpriteList()
 
         world = World()
+        # Generate trees at random in world
+        world.place_random_trees()
         #self.world_objects.extend(world.place_trees())
-        #self.world_map.extend(world.place_trees())
+        #self.world_map.extend(world.place_random_trees())
         # Generate world forest(s).
         '''
         world.generate_forest((10, 10), 8)
@@ -164,26 +166,26 @@ class Game(arcade.View):
 
         # Scroll left
         left_bndry = self.view_left + config.VIEWPORT_MARGIN
-        if self.player_sprite.left < left_bndry:
-            self.view_left -= left_bndry - self.player_sprite.left
+        if self.player_sprite.center_x < left_bndry:
+            self.view_left -= left_bndry - self.player_sprite.center_x
             changed = True
 
         # Scroll right
         right_bndry = self.view_left + config.WINDOW_WIDTH - config.VIEWPORT_MARGIN
-        if self.player_sprite.right > right_bndry:
-            self.view_left += self.player_sprite.right - right_bndry
+        if self.player_sprite.center_x > right_bndry:
+            self.view_left += self.player_sprite.center_x - right_bndry
             changed = True
 
         # Scroll up
         top_bndry = self.view_bottom + config.WINDOW_HEIGHT - config.VIEWPORT_MARGIN
-        if self.player_sprite.top > top_bndry:
-            self.view_bottom += self.player_sprite.top - top_bndry
+        if self.player_sprite.center_y > top_bndry:
+            self.view_bottom += self.player_sprite.center_y - top_bndry
             changed = True
 
         # Scroll down
         bottom_bndry = self.view_bottom + config.VIEWPORT_MARGIN
-        if self.player_sprite.bottom < bottom_bndry:
-            self.view_bottom -= bottom_bndry - self.player_sprite.bottom
+        if self.player_sprite.center_y < bottom_bndry:
+            self.view_bottom -= bottom_bndry - self.player_sprite.center_y
             changed = True
 
         if changed:

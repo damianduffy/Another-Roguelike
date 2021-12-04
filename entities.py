@@ -14,7 +14,7 @@ class BaseEntity(arcade.Sprite):
     def __init__(
         self, 
         filename: str = None, 
-        scale: float = 1, 
+        scale: float = config.SPRITE_SCALING, 
         image_x: float = 0, 
         image_y: float = 0, 
         image_width: float = 0, 
@@ -35,7 +35,7 @@ class BaseEntity(arcade.Sprite):
     ):
         super().__init__(
             filename=filename, 
-            scale=config.SPRITE_SCALING, 
+            scale=scale, 
             image_x=image_x, 
             image_y=image_y, 
             image_width=image_width, 
@@ -100,6 +100,7 @@ class Player(BaseEntity):
             center_x = random.randrange(config.GRID_WIDTH) * config.TILE_SIZE, 
             center_y = random.randrange(config.GRID_HEIGHT) * config.TILE_SIZE, 
         )
+        # Animation state tracking
         self.charactor_directions = ["down", "up", "right", "left"]
         self.direction_index = 0
         self.charactor_actions = ["idle", "walk", "attack"]
@@ -107,7 +108,8 @@ class Player(BaseEntity):
         self.max_frames = 4
         self.cur_frame = 0
         self.updates_per_frame = 5
-        # Load textures for walking
+
+        # Load textures
         self.walk_textures = []
         for action in self.charactor_actions:
             action_frames = []
@@ -133,7 +135,6 @@ class Player(BaseEntity):
         # How fast to slow down after we letr off the key
         self.friction = 0.06
         
-        self.movement_speed = 2
         self.power = 7
         self.defense = 2
 
@@ -274,4 +275,5 @@ class Monster(BaseEntity):
             center_x = random.randrange(config.GRID_WIDTH) * config.TILE_SIZE, 
             center_y = random.randrange(config.GRID_HEIGHT) * config.TILE_SIZE, 
             hp = 20, 
+            scale=4, 
         )
