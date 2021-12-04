@@ -86,7 +86,6 @@ class Game(arcade.View):
         self.player_list.append(self.player_sprite)
         self.enemy_list.append(Monster())
 
-
         # Place the player randomly in the map
         #dg.place_player(self.player_sprite, self.world_map, config)
 
