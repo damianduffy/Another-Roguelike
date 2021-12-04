@@ -153,6 +153,10 @@ class Game(arcade.View):
         self.player_sprite.on_update(delta_time)
         self.player_sprite.update_animation(delta_time)
 
+        # update enemy sprites
+        self.enemy_list.update()
+        self.enemy_list.on_update(delta_time)
+
         player_collision_list = arcade.check_for_collision_with_list(self.player_sprite, self.enemy_list)
         if len(player_collision_list) > 0:
             for enemy in player_collision_list:
@@ -161,7 +165,6 @@ class Game(arcade.View):
         # --- Manage Scrolling ---
 
         # Track if we need to change the viewport
-
         changed = False
 
         # Scroll left

@@ -54,6 +54,7 @@ class BaseEntity(arcade.Sprite):
         )
         self.max_hp=max_hp
         self.hp=hp
+        self.invincible_frame_counter=0
     
     @property
     def max_hp(self):
@@ -92,6 +93,18 @@ class BaseEntity(arcade.Sprite):
             width=hp_width,
             height=2 * self.scale, 
             color=(0, 255, 0))
+    
+    def attacked(self, damage):
+        if self.invincible_frame_counter <= 0 and damage > 0:
+            self.hp -= damage
+            self.invincible_frame_counter = 0.5   
+    
+    def on_update(self, delta_time):
+        if self.invincible_frame_counter != 0:
+            self.invincible_frame_counter -= delta_time
+            if self.invincible_frame_counter < 0:
+                # Reset to 0 ... ie. no longer invincible
+                self.invincible_frame_counter = 0
 
 
 class Player(BaseEntity):
@@ -216,10 +229,17 @@ class Player(BaseEntity):
             self.change_y = self.max_speed
         elif self.change_y < -self.max_speed:
             self.change_y = -self.max_speed
+        
+        # Decrement the invincibility frame counter, if it's currently running.
+        if self.invincible_frame_counter != 0:
+            self.invincible_frame_counter -= delta_time
+            if self.invincible_frame_counter < 0:
+                # Reset to 0 ... ie. no longer invincible
+                self.invincible_frame_counter = 0
 
     def attack(self, enemy):
         damage = self.power         # Iterate on this by subtracting "target" defense to get "damage".
-        enemy.hp -= damage
+        enemy.attacked(damage)
         
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
